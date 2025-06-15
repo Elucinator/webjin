@@ -11,9 +11,7 @@ return new class extends Migration {
      */
     public function up(): void {
         Schema::table('businesses', function (Blueprint $table) {
-            $table->text('photo_url')->nullable()->after('website');
-            $table->decimal('lat', 10, 7)->nullable()->after('photo_url');
-            $table->decimal('lng', 10, 7)->nullable()->after('lat');
+            $table->foreignId('theme_id')->nullable()->constrained()->nullOnDelete();
         });
     }
 
@@ -22,7 +20,7 @@ return new class extends Migration {
      */
     public function down(): void {
         Schema::table('businesses', function (Blueprint $table) {
-            $table->dropColumn(['photo_url', 'lat', 'lng']);
+            $table->dropColumn(['theme_id']);
         });
     }
 };

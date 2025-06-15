@@ -17,10 +17,15 @@ class Business extends Model {
         'address',
         'phone',
         'website',
-        'raw_json',
         'photo_url',
         'lat',
         'lng',
+        'theme_id',
+        'raw_json'
     ];
+
+    public function theme() {
+        return $this->belongsTo(Theme::class);
+    }
 
 }

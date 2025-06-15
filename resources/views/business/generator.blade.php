@@ -14,7 +14,7 @@
                         id="businessSearch"
                         placeholder="Type your business name..."
                         class="w-full border rounded p-2 mb-4"
-                    />
+                        />
 
                     <ul id="results" class="space-y-2"></ul>
 
@@ -25,6 +25,15 @@
                         <p><strong>Website:</strong> <span id="bizWebsite"></span></p>
                         <button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded" onclick="generateWebsite()">Generate Website</button>
                     </div>
+                    <div class="mt-6">
+                        <label for="theme" class="block font-medium text-sm text-gray-700">Select a Theme</label>
+                        <select id="theme" name="theme" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            @foreach ($themes as $theme)
+                            <option value="{{ $theme->name }}">{{ $theme->label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -40,42 +49,44 @@
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
                 const q = this.value;
-                if (q.length < 3) return;
+                if (q.length < 3)
+                    return;
 
                 fetch(`/business/search?q=${encodeURIComponent(q)}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        resultsBox.innerHTML = '';
-                        (data.results || []).forEach(item => {
-                            const li = document.createElement('li');
-                            li.className = "cursor-pointer p-2 bg-white border rounded hover:bg-gray-100";
-                            li.textContent = item.name + ' - ' + item.formatted_address;
-                            li.onclick = () => selectBusiness(item.place_id);
-                            resultsBox.appendChild(li);
+                        .then(res => res.json())
+                        .then(data => {
+                            resultsBox.innerHTML = '';
+                            (data.results || []).forEach(item => {
+                                const li = document.createElement('li');
+                                li.className = "cursor-pointer p-2 bg-white border rounded hover:bg-gray-100";
+                                li.textContent = item.name + ' - ' + item.formatted_address;
+                                li.onclick = () => selectBusiness(item.place_id);
+                                resultsBox.appendChild(li);
+                            });
                         });
-                    });
             }, 500);
         });
 
         function selectBusiness(placeId) {
             fetch(`/business/details?place_id=${placeId}`)
-                .then(res => res.json())
-                .then(data => {
-                    const info = data.result;
-                    document.getElementById('bizName').textContent = info.name || '';
-                    document.getElementById('bizAddress').textContent = info.formatted_address || '';
-                    document.getElementById('bizPhone').textContent = info.formatted_phone_number || '';
-                    document.getElementById('bizWebsite').textContent = info.website || '';
-                    previewBox.classList.remove('hidden');
-                    previewBox.dataset.placeId = placeId;
-                    previewBox.dataset.businessJson = JSON.stringify(info);
-                });
+                    .then(res => res.json())
+                    .then(data => {
+                        const info = data.result;
+                        document.getElementById('bizName').textContent = info.name || '';
+                        document.getElementById('bizAddress').textContent = info.formatted_address || '';
+                        document.getElementById('bizPhone').textContent = info.formatted_phone_number || '';
+                        document.getElementById('bizWebsite').textContent = info.website || '';
+                        previewBox.classList.remove('hidden');
+                        previewBox.dataset.placeId = placeId;
+                        previewBox.dataset.businessJson = JSON.stringify(info);
+                    });
         }
 
         function generateWebsite() {
             const data = {
                 place_id: document.getElementById('businessPreview').dataset.placeId,
-                business_json: document.getElementById('businessPreview').dataset.businessJson
+                business_json: document.getElementById('businessPreview').dataset.businessJson,
+                theme_name: document.getElementById('theme').value
             };
 
             fetch('/generate-site-from-google', {
@@ -86,10 +97,10 @@
                 },
                 body: JSON.stringify(data)
             }).then(res => res.json())
-              .then(res => {
-                  alert('Website created! URL: ' + res.url);
-                  window.location.href = res.url;
-              });
+                    .then(res => {
+                        alert('Website created! URL: ' + res.url);
+                        window.location.href = res.url;
+                    });
         }
     </script>
 </x-app-layout>

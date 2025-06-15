@@ -6,11 +6,15 @@ use App\Models\Business;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Services\GooglePlacesService;
+use App\Models\Theme;
 
 class BusinessController extends Controller {
 
     public function generatorView() {
-        return view('business.generator');
+        $themes = Theme::where('is_active', true)->get();
+        return view('business.generator', [
+            'themes' => $themes
+        ]);
     }
 
     public function search(Request $request, GooglePlacesService $places) {
@@ -28,10 +32,14 @@ class BusinessController extends Controller {
         $placeId = $request->input('place_id');
 
         $photoReference = $data['photos'][0]['photo_reference'] ?? null;
-        $photoUrl = $photoReference ? "https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference={$photoReference}&key=" . config('services.google.places_key') : null;
+        $photoUrl = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference={$photoReference}&key=YOUR_API_KEY";
+
+        $photoUrl = $photoReference ? "https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference={$photoReference}&key=" . config('services.google_places.key') : null;
 
         $lat = $data['geometry']['location']['lat'] ?? null;
         $lng = $data['geometry']['location']['lng'] ?? null;
+
+        $theme = Theme::where('name', $request->input('theme_name'))->first();
 
         $business = Business::updateOrCreate(
                         ['place_id' => $placeId],
@@ -44,6 +52,7 @@ class BusinessController extends Controller {
                             'lat' => $lat,
                             'lng' => $lng,
                             'raw_json' => json_encode($data),
+                            'theme_id' => $theme?->id,
                         ]
         );
 
@@ -58,8 +67,9 @@ class BusinessController extends Controller {
         $id = last(explode('-', $slug));
         $business = Business::findOrFail($id);
         $details = json_decode($business->raw_json, true);
+        $theme = $business->theme->name ?? 'default';
 
-        return view('business.website', [
+        return view("themes.$theme.website", [
             'business' => $business,
             'details' => $details,
         ]);
