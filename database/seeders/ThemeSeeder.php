@@ -13,9 +13,9 @@ class ThemeSeeder extends Seeder {
      */
     public function run(): void {
         Theme::insert([
-            ['name' => 'default', 'label' => 'Default Theme', 'preview_image' => '/img/themes/default.png'],
-            ['name' => 'modern', 'label' => 'Modern Theme', 'preview_image' => '/img/themes/modern.png'],
-            ['name' => 'dark', 'label' => 'Dark Theme', 'preview_image' => '/img/themes/dark.png'],
+            ['name' => 'default', 'label' => 'Default Theme', 'preview_image' => '/themes/default/preview.png'],
+            ['name' => 'modern', 'label' => 'Modern Theme', 'preview_image' => '/themes/modern/preview.png'],
+            ['name' => 'dark', 'label' => 'Dark Theme', 'preview_image' => '/themes/dark/preview.png'],
         ]);
     }
 

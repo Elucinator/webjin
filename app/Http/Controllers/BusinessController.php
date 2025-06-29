@@ -75,4 +75,22 @@ class BusinessController extends Controller {
         ]);
     }
 
+    public function changeTheme(Request $request, Business $business)
+    {
+        $request->validate([
+            'theme_name' => 'required|exists:themes,name',
+        ]);
+
+        $theme = Theme::where('name', $request->input('theme_name'))->firstOrFail();
+
+        $business->theme()->associate($theme);
+        $business->save();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Theme updated successfully!');
+
+    }
+
+
 }

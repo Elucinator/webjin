@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\WebsiteController;
+use App\Http\Controllers\Dashboard\WebsiteController as DashboardWebsiteController;
 use Illuminate\Support\Facades\Route;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,5 +28,27 @@ Route::get('/business/details', [BusinessController::class, 'details'])->name('b
 Route::get('/business/generator', [BusinessController::class, 'generatorView'])->name('business.generator');
 Route::post('/generate-site-from-google', [BusinessController::class, 'generate'])->name('business.generate');
 Route::get('/site/{slug}', [BusinessController::class, 'viewSite'])->name('business.site.view');
+Route::get('/websites/{business}', [WebsiteController::class, 'show'])->name('websites.show');
+Route::get('/dashboard/websites', [DashboardWebsiteController::class, 'index'])->name('dashboard.websites');
+Route::post('/dashboard/websites/{business}/regenerate', [DashboardWebsiteController::class, 'regenerate'])->name('dashboard.websites.regenerate');
+// Show regeneration form
+Route::get('/dashboard/websites/{business}/regenerate', [DashboardWebsiteController::class, 'showRegenerationForm'])
+    ->name('dashboard.websites.regenerate.form');
+// Handle regeneration
+Route::post('/dashboard/business/{business}/regenerate', [BusinessController::class, 'regenerate'])->name('dashboard.websites.regenerate');
+// Change Theme Only
+Route::post('/dashboard/business/{business}/change-theme', [BusinessController::class, 'changeTheme'])->name('dashboard.websites.changeTheme');
+
+Route::get('/theme/preview/{theme}/{business}', function ($theme, $businessId) {
+    $theme = App\Models\Theme::where('name', $theme)->firstOrFail();
+    $business = App\Models\Business::findOrFail($businessId);
+
+    return view("themes.{$theme->name}.website", [
+        'business' => $business,
+        'details' => json_decode($business->raw_json, true),
+    ]);
+})->name('theme.preview');
+
+
 
 require __DIR__.'/auth.php';
